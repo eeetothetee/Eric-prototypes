@@ -1,0 +1,16 @@
+# Netlify deploy config for the static (browser-only) build.
+# Hosts the app for free from a private repo. Data is stored in the browser
+# via localStorage (per-device, not synced).
+[build]
+  base = "client"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_STATIC = "true"
+
+# SPA fallback so any path serves the app.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
