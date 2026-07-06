@@ -133,7 +133,7 @@ export default function BillForm({ bill, members, onClose, onSaved }: Props) {
                 className={payerMemberId === m.id ? "on" : ""}
                 onClick={() => setPayerMemberId(m.id)}
               >
-                {m.emoji} {m.name}
+                {m.name}
               </button>
             ))}
           </div>

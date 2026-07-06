@@ -7,14 +7,15 @@ import InsightsView from "./components/InsightsView";
 import SettingsView from "./components/SettingsView";
 import BillForm from "./components/BillForm";
 import PaySheet from "./components/PaySheet";
+import { ChartIcon, GearIcon, HomeIcon, ListIcon, PlusIcon, initials } from "./components/icons";
 
 type Tab = "home" | "bills" | "insights" | "settings";
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "home", label: "This Month", icon: "🏡" },
-  { id: "bills", label: "Bills", icon: "🧾" },
-  { id: "insights", label: "Insights", icon: "📊" },
-  { id: "settings", label: "Settings", icon: "⚙️" },
+const TABS: { id: Tab; label: string; Icon: typeof HomeIcon }[] = [
+  { id: "home", label: "Month", Icon: HomeIcon },
+  { id: "bills", label: "Bills", Icon: ListIcon },
+  { id: "insights", label: "Insights", Icon: ChartIcon },
+  { id: "settings", label: "Settings", Icon: GearIcon },
 ];
 
 export default function App() {
@@ -76,7 +77,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div>
-          <div className="household">{household?.householdName ?? "…"}</div>
+          <div className="household">{household?.householdName ?? "\u2014"}</div>
           <h1>
             {tab === "home" && "Monthly Bills"}
             {tab === "bills" && "Recurring Bills"}
@@ -87,14 +88,14 @@ export default function App() {
         <div className="avatars">
           {household?.members.map((m) => (
             <div key={m.id} className="avatar" style={{ background: m.color }} title={m.name}>
-              {m.emoji}
+              {initials(m.name)}
             </div>
           ))}
         </div>
       </header>
 
       {loading && !monthData ? (
-        <div className="loading">Loading…</div>
+        <div className="loading">Loading</div>
       ) : (
         <>
           {tab === "home" && monthData && household && (
@@ -130,19 +131,15 @@ export default function App() {
 
       {(tab === "home" || tab === "bills") && (
         <button className="fab" aria-label="Add bill" onClick={openAddBill}>
-          +
+          <PlusIcon />
         </button>
       )}
 
       <nav className="tabbar">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={tab === t.id ? "active" : ""}
-            onClick={() => setTab(t.id)}
-          >
-            <span className="tab-icon">{t.icon}</span>
-            {t.label}
+        {TABS.map(({ id, label, Icon }) => (
+          <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>
+            <Icon width={21} height={21} strokeWidth={tab === id ? 1.8 : 1.5} />
+            {label}
           </button>
         ))}
       </nav>

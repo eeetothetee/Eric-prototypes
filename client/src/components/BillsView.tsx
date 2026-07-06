@@ -1,6 +1,6 @@
 import { formatMoney, ordinal } from "../api";
 import type { Bill, Member } from "../types";
-import { CATEGORY_ICONS } from "../types";
+import { CategoryIcon, ListIcon } from "./icons";
 
 interface Props {
   bills: Bill[];
@@ -19,37 +19,38 @@ export default function BillsView({ bills, members, onEdit, onAdd }: Props) {
   }
 
   const payerLabel = (b: Bill) => {
-    if (b.payer_member_id == null) return "Either partner";
-    return members.find((m) => m.id === b.payer_member_id)?.name ?? "—";
+    if (b.payer_member_id == null) return "Either";
+    return members.find((m) => m.id === b.payer_member_id)?.name ?? "\u2014";
   };
 
   const splitLabel = (b: Bill) => {
     if (b.split_type === "payer") return "payer covers";
-    if (b.split_type === "custom") return `${b.split_pct}/${100 - b.split_pct} split`;
-    return "50/50 split";
+    if (b.split_type === "custom") return `${b.split_pct}/${100 - b.split_pct}`;
+    return "50/50";
   };
 
   return (
     <div className="screen">
       <div className="settle-card">
         <h3>Recurring total</h3>
-        <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>
-          {formatMoney(monthlyTotal)}
-          <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink-soft)" }}> / month</span>
+        <div className="big-figure num">
+          {formatMoney(monthlyTotal)} <span className="unit">/ month</span>
         </div>
-        <div style={{ fontSize: 13, color: "var(--ink-soft)", marginTop: 4 }}>
+        <div className="big-figure-sub">
           {bills.length} recurring {bills.length === 1 ? "bill" : "bills"}
         </div>
       </div>
 
       {bills.length === 0 && (
         <div className="empty">
-          <div className="big">🧾</div>
+          <div className="big">
+            <ListIcon width={36} height={36} strokeWidth={1.2} />
+          </div>
           <p>
             <strong>No recurring bills</strong>
           </p>
           <p>Add the bills you and your partner pay every month.</p>
-          <button className="btn primary" style={{ marginTop: 14 }} onClick={onAdd}>
+          <button className="btn primary" style={{ marginTop: 16 }} onClick={onAdd}>
             Add a bill
           </button>
         </div>
@@ -57,26 +58,28 @@ export default function BillsView({ bills, members, onEdit, onAdd }: Props) {
 
       {[...byCategory.entries()].map(([category, catBills]) => (
         <div key={category} className="bill-group">
-          <div className="section-title">
-            {CATEGORY_ICONS[category] || "📌"} {category}
-          </div>
-          {catBills.map((b) => (
-            <button key={b.id} className="bill-card" onClick={() => onEdit(b)}>
-              <span className="icon">{CATEGORY_ICONS[b.category] || "📌"}</span>
-              <span className="bill-main">
-                <span className="name">{b.name}</span>
-                <span className="meta">
-                  <span>
-                    Due {ordinal(b.due_day)} · {payerLabel(b)} · {splitLabel(b)}
-                  </span>
-                  {b.autopay === 1 && <span className="pill autopay">Autopay</span>}
+          <div className="section-title">{category}</div>
+          <div className="rows">
+            {catBills.map((b) => (
+              <button key={b.id} className="bill-card" onClick={() => onEdit(b)}>
+                <span className="icon">
+                  <CategoryIcon category={b.category} width={18} height={18} />
                 </span>
-              </span>
-              <span className="bill-right">
-                <span className="amount">{formatMoney(b.amount_cents)}</span>
-              </span>
-            </button>
-          ))}
+                <span className="bill-main">
+                  <span className="name">{b.name}</span>
+                  <span className="meta">
+                    <span>
+                      Due {ordinal(b.due_day)} · {payerLabel(b)} · {splitLabel(b)}
+                    </span>
+                    {b.autopay === 1 && <span className="pill autopay">Auto</span>}
+                  </span>
+                </span>
+                <span className="bill-right">
+                  <span className="amount num">{formatMoney(b.amount_cents)}</span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       ))}
     </div>

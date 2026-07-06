@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api, IS_STATIC } from "../api";
 import type { Household, Member } from "../types";
+import { initials } from "./icons";
 
 interface Props {
   household: Household;
@@ -9,16 +10,15 @@ interface Props {
 
 function MemberEditor({ member, onSaved }: { member: Member; onSaved: () => void }) {
   const [name, setName] = useState(member.name);
-  const [emoji, setEmoji] = useState(member.emoji);
   const [color, setColor] = useState(member.color);
   const [busy, setBusy] = useState(false);
 
-  const dirty = name !== member.name || emoji !== member.emoji || color !== member.color;
+  const dirty = name !== member.name || color !== member.color;
 
   const save = async () => {
     setBusy(true);
     try {
-      await api.updateMember(member.id, { name, emoji, color });
+      await api.updateMember(member.id, { name, color });
       onSaved();
     } finally {
       setBusy(false);
@@ -28,18 +28,17 @@ function MemberEditor({ member, onSaved }: { member: Member; onSaved: () => void
   return (
     <div>
       <div className="member-edit">
-        <input
-          className="emoji-input"
-          value={emoji}
-          maxLength={4}
-          onChange={(e) => setEmoji(e.target.value)}
-          aria-label="Emoji"
-        />
+        <div
+          className="avatar"
+          style={{ background: color, border: "none", width: 40, height: 40, flexShrink: 0 }}
+        >
+          {initials(name)}
+        </div>
         <input type="text" value={name} onChange={(e) => setName(e.target.value)} aria-label="Name" />
         <input type="color" value={color} onChange={(e) => setColor(e.target.value)} aria-label="Color" />
       </div>
       {dirty && (
-        <button className="btn subtle block" style={{ marginTop: 8 }} onClick={save} disabled={busy}>
+        <button className="btn subtle block" style={{ marginTop: 10 }} onClick={save} disabled={busy}>
           Save {name || "member"}
         </button>
       )}
@@ -81,23 +80,22 @@ export default function SettingsView({ household, onSaved }: Props) {
         {household.members.map((m) => (
           <MemberEditor key={m.id} member={m} onSaved={onSaved} />
         ))}
-        <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: 0 }}>
-          Set each partner's name, emoji, and color. These show up on payments and the settle-up
-          view.
+        <p className="body-text faint">
+          Each partner has a name and a color. These identify payments and the settle-up view.
         </p>
       </div>
 
       <div className="settings-card">
         <h3 className="section-title">About</h3>
-        <p style={{ fontSize: 13.5, color: "var(--ink-soft)", margin: 0 }}>
+        <p className="body-text">
           Family Bills — a shared monthly bill tracker for couples. Add your recurring bills, mark
           them paid each month, and see who owes whom.
         </p>
         {IS_STATIC && (
-          <p style={{ fontSize: 12.5, color: "var(--ink-faint)", margin: 0 }}>
-            You're using the offline demo. Your data is saved privately in this browser on this
-            device, so it won't sync between phones. To share bills live with your partner, run the
-            full app with its server.
+          <p className="body-text faint">
+            You're using the offline version. Data is saved privately in this browser on this
+            device, so it won't sync between phones. To share bills live with your partner, run
+            the full app with its server.
           </p>
         )}
       </div>
