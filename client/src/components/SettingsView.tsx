@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../api";
+import { api, IS_STATIC } from "../api";
 import type { Household, Member } from "../types";
 
 interface Props {
@@ -93,6 +93,13 @@ export default function SettingsView({ household, onSaved }: Props) {
           Family Bills — a shared monthly bill tracker for couples. Add your recurring bills, mark
           them paid each month, and see who owes whom.
         </p>
+        {IS_STATIC && (
+          <p style={{ fontSize: 12.5, color: "var(--ink-faint)", margin: 0 }}>
+            You're using the offline demo. Your data is saved privately in this browser on this
+            device, so it won't sync between phones. To share bills live with your partner, run the
+            full app with its server.
+          </p>
+        )}
       </div>
     </div>
   );

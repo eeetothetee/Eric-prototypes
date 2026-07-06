@@ -43,6 +43,31 @@ npm run dev:server    # Express API with auto-reload on :3000
 npm run dev:client    # Vite dev server on :5173, proxies /api to :3000
 ```
 
+## Static / offline build (GitHub Pages)
+
+The app can also run with no backend at all — handy for viewing on your phone
+straight from a URL. In this mode all data is stored in the browser via
+`localStorage` (so it lives on that one device and doesn't sync between phones).
+
+A GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) builds this
+static version and publishes it to GitHub Pages on every push to `main` (and to
+the feature branch). After the first successful run the site is available at:
+
+```
+https://<your-github-username>.github.io/<repo-name>/
+```
+
+To build the static version yourself:
+
+```bash
+cd client
+VITE_STATIC=true npm run build   # add VITE_BASE=/repo-name/ for a subpath host
+```
+
+> Note: GitHub Pages only serves static files, so this build uses the
+> browser-only (localStorage) data layer. For live sharing between partners,
+> run the full server build above.
+
 ## API overview
 
 | Method | Path | Purpose |

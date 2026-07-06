@@ -1,4 +1,10 @@
 import type { Bill, Household, HistoryRow, Member, MonthData, Payment } from "./types";
+import { localApi } from "./localApi";
+
+// When built for a static host (e.g. GitHub Pages) there is no backend, so the
+// app runs fully in the browser against localStorage. Otherwise it talks to the
+// Express API. This is controlled at build time via VITE_STATIC.
+export const IS_STATIC = import.meta.env.VITE_STATIC === "true";
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -12,7 +18,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
-export const api = {
+const serverApi = {
   getHousehold: () => request<Household>("/api/household"),
   updateHousehold: (householdName: string) =>
     request("/api/household", { method: "PUT", body: JSON.stringify({ householdName }) }),
@@ -33,6 +39,8 @@ export const api = {
   unpayBill: (id: number, month: string) =>
     request(`/api/bills/${id}/pay/${month}`, { method: "DELETE" }),
 };
+
+export const api = IS_STATIC ? localApi : serverApi;
 
 export interface BillInput {
   name: string;
