@@ -47,7 +47,7 @@ export default function PaySheet({ bill, month, members, onClose, onPaid }: Prop
           <div className="seg">
             {members.map((m) => (
               <button key={m.id} className={paidBy === m.id ? "on" : ""} onClick={() => setPaidBy(m.id)}>
-                {m.emoji} {m.name}
+                {m.name}
               </button>
             ))}
           </div>

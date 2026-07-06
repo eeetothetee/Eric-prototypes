@@ -65,16 +65,3 @@ export const CATEGORIES = [
   "Health",
   "Other",
 ] as const;
-
-export const CATEGORY_ICONS: Record<string, string> = {
-  Housing: "🏠",
-  Utilities: "💡",
-  "Internet & Phone": "📶",
-  Insurance: "🛡️",
-  Subscriptions: "📺",
-  Transportation: "🚗",
-  "Debt & Loans": "🏦",
-  Childcare: "🧸",
-  Health: "🩺",
-  Other: "📌",
-};

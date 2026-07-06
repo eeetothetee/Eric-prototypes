@@ -1,6 +1,6 @@
 import { currentMonth, formatMoney, monthLabel, ordinal, shiftMonth } from "../api";
 import type { Bill, MonthData, MonthItem } from "../types";
-import { CATEGORY_ICONS } from "../types";
+import { CategoryIcon, CheckIcon, ChevronLeft, ChevronRight, ListIcon, initials } from "./icons";
 
 interface Props {
   data: MonthData;
@@ -12,26 +12,29 @@ interface Props {
 }
 
 function ProgressRing({ pct }: { pct: number }) {
-  const r = 40;
+  const r = 46;
   const c = 2 * Math.PI * r;
   return (
     <div className="ring">
-      <svg width="96" height="96" viewBox="0 0 96 96">
-        <circle cx="48" cy="48" r={r} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="9" />
+      <svg width="104" height="104" viewBox="0 0 104 104">
+        <circle cx="52" cy="52" r={r} fill="none" stroke="var(--line)" strokeWidth="5" />
         <circle
-          cx="48"
-          cy="48"
+          cx="52"
+          cy="52"
           r={r}
           fill="none"
-          stroke="#7ee0b8"
-          strokeWidth="9"
-          strokeLinecap="round"
+          stroke="var(--accent)"
+          strokeWidth="5"
+          strokeLinecap="butt"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - pct)}
           style={{ transition: "stroke-dashoffset 0.4s ease" }}
         />
       </svg>
-      <div className="pct">{Math.round(pct * 100)}%</div>
+      <div className="pct">
+        {Math.round(pct * 100)}
+        <small>%</small>
+      </div>
     </div>
   );
 }
@@ -55,16 +58,19 @@ function SettleUp({ data }: { data: MonthData }) {
       <div className="settle-body">
         {members.map((m) => {
           const paid = contribution[m.id] || 0;
-          const w = total > 0 ? Math.max(4, (paid / total) * 100) : 0;
+          const w = total > 0 ? Math.max(2, (paid / total) * 100) : 0;
           return (
             <div key={m.id} className="settle-row">
-              <div className="avatar" style={{ background: m.color, width: 30, height: 30, fontSize: 14, border: "none" }}>
-                {m.emoji}
+              <div
+                className="avatar"
+                style={{ background: m.color, width: 28, height: 28, fontSize: 11, border: "none" }}
+              >
+                {initials(m.name)}
               </div>
               <div className="bar-track">
                 <div className="bar-fill" style={{ width: `${w}%`, background: m.color }} />
               </div>
-              <div className="amt">{formatMoney(paid)}</div>
+              <div className="amt num">{formatMoney(paid)}</div>
             </div>
           );
         })}
@@ -74,7 +80,7 @@ function SettleUp({ data }: { data: MonthData }) {
           {owes.name} owes {owed.name} {formatMoney(amount)} to settle up
         </div>
       ) : (
-        <div className="settle-verdict even">You're all settled up 🎉</div>
+        <div className="settle-verdict even">Settled up — nothing owed</div>
       )}
     </div>
   );
@@ -99,26 +105,61 @@ function BillRow({
   return (
     <div className={`bill-card ${paid ? "paid" : isPastDue ? "overdue" : ""}`}>
       <button className="icon" onClick={onEdit} aria-label={`Edit ${bill.name}`}>
-        {CATEGORY_ICONS[bill.category] || "📌"}
+        <CategoryIcon category={bill.category} width={18} height={18} />
       </button>
       <button className="bill-main" onClick={onEdit}>
-        <div className="name">{bill.name}</div>
-        <div className="meta">
+        <span className="name">{bill.name}</span>
+        <span className="meta">
           <span>Due {ordinal(bill.due_day)}</span>
-          {bill.autopay === 1 && <span className="pill autopay">Autopay</span>}
+          {bill.autopay === 1 && <span className="pill autopay">Auto</span>}
           {!paid && isPastDue && <span className="pill overdue">Overdue</span>}
-          {paid && paidBy && <span className="pill paid-by">Paid by {paidBy}</span>}
-        </div>
+          {paid && paidBy && <span className="pill paid-by">{paidBy}</span>}
+        </span>
       </button>
       <div className="bill-right">
-        <div className="amount">{formatMoney(payment ? payment.amount_cents : bill.amount_cents)}</div>
+        <div className="amount num">{formatMoney(payment ? payment.amount_cents : bill.amount_cents)}</div>
         <button
           className={`paycheck ${paid ? "done" : ""}`}
           onClick={onToggle}
           aria-label={paid ? "Mark unpaid" : "Mark paid"}
         >
-          ✓
+          <CheckIcon strokeWidth={2.2} />
         </button>
+      </div>
+    </div>
+  );
+}
+
+function BillGroup({
+  title,
+  items,
+  isPastDue,
+  memberName,
+  onTogglePaid,
+  onEditBill,
+}: {
+  title: string;
+  items: MonthItem[];
+  isPastDue: boolean;
+  memberName: (id: number | null) => string | null;
+  onTogglePaid: (bill: Bill) => void;
+  onEditBill: (bill: Bill) => void;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="bill-group">
+      <div className="section-title">{title}</div>
+      <div className="rows">
+        {items.map((it) => (
+          <BillRow
+            key={it.bill.id}
+            item={it}
+            isPastDue={isPastDue}
+            memberName={memberName}
+            onToggle={() => onTogglePaid(it.bill)}
+            onEdit={() => onEditBill(it.bill)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -144,11 +185,11 @@ export default function MonthView({ data, month, onMonthChange, onTogglePaid, on
     <div className="screen">
       <div className="month-switcher">
         <button onClick={() => onMonthChange(shiftMonth(month, -1))} aria-label="Previous month">
-          ‹
+          <ChevronLeft width={18} height={18} />
         </button>
         <span className="label">{monthLabel(month)}</span>
         <button onClick={() => onMonthChange(shiftMonth(month, 1))} aria-label="Next month">
-          ›
+          <ChevronRight width={18} height={18} />
         </button>
       </div>
 
@@ -156,7 +197,7 @@ export default function MonthView({ data, month, onMonthChange, onTogglePaid, on
         <ProgressRing pct={pct} />
         <div className="summary-figures">
           <div className="row">
-            <span>Total bills</span>
+            <span>Total</span>
             <strong>{formatMoney(summary.totalCents)}</strong>
           </div>
           <div className="row">
@@ -174,64 +215,43 @@ export default function MonthView({ data, month, onMonthChange, onTogglePaid, on
 
       {items.length === 0 && (
         <div className="empty">
-          <div className="big">🧾</div>
+          <div className="big">
+            <ListIcon width={36} height={36} strokeWidth={1.2} />
+          </div>
           <p>
             <strong>No bills yet</strong>
           </p>
           <p>Add your rent, utilities, and subscriptions to start tracking together.</p>
-          <button className="btn primary" style={{ marginTop: 14 }} onClick={onAddBill}>
+          <button className="btn primary" style={{ marginTop: 16 }} onClick={onAddBill}>
             Add your first bill
           </button>
         </div>
       )}
 
-      {overdue.length > 0 && (
-        <div className="bill-group">
-          <div className="section-title">Overdue</div>
-          {overdue.map((it) => (
-            <BillRow
-              key={it.bill.id}
-              item={it}
-              isPastDue
-              memberName={memberName}
-              onToggle={() => onTogglePaid(it.bill)}
-              onEdit={() => onEditBill(it.bill)}
-            />
-          ))}
-        </div>
-      )}
-
-      {upcoming.length > 0 && (
-        <div className="bill-group">
-          <div className="section-title">Upcoming</div>
-          {upcoming.map((it) => (
-            <BillRow
-              key={it.bill.id}
-              item={it}
-              isPastDue={false}
-              memberName={memberName}
-              onToggle={() => onTogglePaid(it.bill)}
-              onEdit={() => onEditBill(it.bill)}
-            />
-          ))}
-        </div>
-      )}
-
-      {paidItems.length > 0 && (
-        <div className="bill-group">
-          <div className="section-title">Paid</div>
-          {paidItems.map((it) => (
-            <BillRow
-              key={it.bill.id}
-              item={it}
-              isPastDue={false}
-              memberName={memberName}
-              onToggle={() => onTogglePaid(it.bill)}
-              onEdit={() => onEditBill(it.bill)}
-            />
-          ))}
-        </div>
-      )}
+      <BillGroup
+        title="Overdue"
+        items={overdue}
+        isPastDue
+        memberName={memberName}
+        onTogglePaid={onTogglePaid}
+        onEditBill={onEditBill}
+      />
+      <BillGroup
+        title="Upcoming"
+        items={upcoming}
+        isPastDue={false}
+        memberName={memberName}
+        onTogglePaid={onTogglePaid}
+        onEditBill={onEditBill}
+      />
+      <BillGroup
+        title="Paid"
+        items={paidItems}
+        isPastDue={false}
+        memberName={memberName}
+        onTogglePaid={onTogglePaid}
+        onEditBill={onEditBill}
+      />
     </div>
   );
 }

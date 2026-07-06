@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#0e3e4a"/>
-  <text x="50" y="66" font-size="52" text-anchor="middle">🧾</text>
+  <rect width="100" height="100" rx="18" fill="#f4f3ef"/>
+  <rect width="100" height="100" rx="18" fill="none" stroke="#d4d2c9" stroke-width="2"/>
+  <path d="M30 32h40M30 50h40M30 68h24" stroke="#1c1c1a" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="70" cy="68" r="7" fill="#e8500a"/>
 </svg>
