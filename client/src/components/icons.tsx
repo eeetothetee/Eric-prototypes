@@ -69,6 +69,60 @@ export const ChevronRight = (p: P) => (
   </svg>
 );
 
+/* ---- Feature icons ---- */
+
+export const WalletIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="6" width="18" height="13" rx="2.5" />
+    <path d="M3 10h18" />
+    <circle cx="16.5" cy="14.5" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const SwapIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M4 8h13M14 4.5 17.5 8 14 11.5" />
+    <path d="M20 16H7M10 12.5 6.5 16l3.5 3.5" />
+  </svg>
+);
+
+export const FlowIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M3 16c3 0 3-8 6-8s3 8 6 8 3-8 6-8" />
+  </svg>
+);
+
+export const TargetIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="12" r="4.5" />
+    <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const GaugeIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M4 17a8 8 0 1 1 16 0" />
+    <path d="M12 13.5 15.5 9" />
+    <circle cx="12" cy="14" r="1.2" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const RepeatIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M17.5 4.5 20 7l-2.5 2.5" />
+    <path d="M4 13v-1.5A4.5 4.5 0 0 1 8.5 7H20" />
+    <path d="M6.5 19.5 4 17l2.5-2.5" />
+    <path d="M20 11v1.5a4.5 4.5 0 0 1-4.5 4.5H4" />
+  </svg>
+);
+
+export const ArrowLeftIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M19 12H5M10.5 6.5 5 12l5.5 5.5" />
+  </svg>
+);
+
 /* ---- Category icons ---- */
 
 const HouseCat = (p: P) => (
@@ -144,6 +198,41 @@ const TagCat = (p: P) => (
   </svg>
 );
 
+const CartCat = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M3.5 4.5h2l2.2 11h11l2-8H7" />
+    <circle cx="9.5" cy="19.5" r="1.4" />
+    <circle cx="16.5" cy="19.5" r="1.4" />
+  </svg>
+);
+
+const DiningCat = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M7 3.5v6a2 2 0 0 0 2 2v9M9 3.5v5M11 3.5v5" />
+    <path d="M16.5 3.5c-1.7 1-2.5 3.2-2.5 5.5 0 1.7 1 2.5 2.5 2.5v9" />
+  </svg>
+);
+
+const BagCat = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M5.5 8h13l-1 12.5h-11L5.5 8Z" />
+    <path d="M9 10.5V6.5a3 3 0 0 1 6 0v4" />
+  </svg>
+);
+
+const PlaneCat = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M10.5 13.5 3 11l1.5-1.5 6.5 1 5-5.5c.6-.6 1.6-.6 2.2 0 .6.6.6 1.6 0 2.2l-5.5 5 1 6.5L12 20.5l-2.5-7.5" />
+  </svg>
+);
+
+const CoinCat = (p: P) => (
+  <svg {...base} {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5v9M14.8 9.2c-.6-.9-1.7-1.4-2.8-1.4-1.5 0-2.8.9-2.8 2.2 0 2.8 5.6 1.6 5.6 4.2 0 1.3-1.3 2.2-2.8 2.2-1.1 0-2.2-.5-2.8-1.4" />
+  </svg>
+);
+
 const CATEGORY_ICON_MAP: Record<string, (p: P) => React.JSX.Element> = {
   Housing: HouseCat,
   Utilities: BoltCat,
@@ -155,6 +244,15 @@ const CATEGORY_ICON_MAP: Record<string, (p: P) => React.JSX.Element> = {
   Childcare: ChildCat,
   Health: HealthCat,
   Other: TagCat,
+  // Transaction categories
+  Groceries: CartCat,
+  Dining: DiningCat,
+  Shopping: BagCat,
+  Entertainment: PlayCat,
+  Kids: ChildCat,
+  Travel: PlaneCat,
+  Home: HouseCat,
+  Income: CoinCat,
 };
 
 export function CategoryIcon({ category, ...p }: { category: string } & P) {

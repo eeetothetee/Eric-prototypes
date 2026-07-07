@@ -5,7 +5,18 @@ A mobile-first web app for couples to track their monthly bills together — ins
 
 ## Features
 
-- **Shared household** — two partners with names, emoji avatars, and colors.
+- **Dashboard** — an at-a-glance home screen: net worth across accounts, this
+  month's cash flow, transaction activity, budget progress, recurring-bill
+  status, and goal progress. Each card opens a full screen for that area.
+- **Accounts** — checking, savings, cash, credit cards, and loans (joint or
+  per-partner) rolled up into household net worth.
+- **Transactions** — log income and spending with category, date, account, and
+  who spent it.
+- **Cash flow** — money in vs. money out per month with a 6-month chart and a
+  spending-by-category breakdown.
+- **Budget** — set monthly limits per category and track spending against them.
+- **Goals** — save toward shared goals with progress meters and target dates.
+- **Shared household** — two partners with names, initials avatars, and colors.
 - **Recurring bills** — add bills with amount, due day, category, autopay flag, usual payer,
   and notes.
 - **Monthly checklist** — every month you get the full bill list grouped into

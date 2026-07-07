@@ -1,28 +1,55 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, currentMonth } from "./api";
 import type { Bill, Household, MonthData } from "./types";
+import type { ExtData } from "./store";
+import { loadExt, saveExt } from "./store";
+import Dashboard, { type Sub } from "./components/Dashboard";
 import MonthView from "./components/MonthView";
 import BillsView from "./components/BillsView";
 import InsightsView from "./components/InsightsView";
 import SettingsView from "./components/SettingsView";
 import BillForm from "./components/BillForm";
 import PaySheet from "./components/PaySheet";
-import { ChartIcon, GearIcon, HomeIcon, ListIcon, PlusIcon, initials } from "./components/icons";
+import AccountsView from "./components/AccountsView";
+import TransactionsView from "./components/TransactionsView";
+import CashFlowView from "./components/CashFlowView";
+import BudgetView from "./components/BudgetView";
+import GoalsView from "./components/GoalsView";
+import {
+  ArrowLeftIcon,
+  GearIcon,
+  HomeIcon,
+  ListIcon,
+  PlusIcon,
+  ChartIcon,
+  initials,
+} from "./components/icons";
 
 type Tab = "home" | "bills" | "insights" | "settings";
 
 const TABS: { id: Tab; label: string; Icon: typeof HomeIcon }[] = [
-  { id: "home", label: "Month", Icon: HomeIcon },
+  { id: "home", label: "Home", Icon: HomeIcon },
   { id: "bills", label: "Bills", Icon: ListIcon },
   { id: "insights", label: "Insights", Icon: ChartIcon },
   { id: "settings", label: "Settings", Icon: GearIcon },
 ];
 
+const SUB_TITLES: Record<Sub, string> = {
+  accounts: "Accounts",
+  transactions: "Transactions",
+  cashflow: "Cash Flow",
+  budget: "Budget",
+  goals: "Goals",
+  recurring: "Recurring Bills",
+};
+
 export default function App() {
   const [tab, setTab] = useState<Tab>("home");
+  const [sub, setSub] = useState<Sub | null>(null);
   const [month, setMonth] = useState(currentMonth());
   const [household, setHousehold] = useState<Household | null>(null);
   const [monthData, setMonthData] = useState<MonthData | null>(null);
+  const [ext, setExt] = useState<ExtData | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -52,6 +79,27 @@ export default function App() {
     refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    loadExt()
+      .then(setExt)
+      .catch(() => showToast("Could not load household data"));
+  }, [showToast]);
+
+  const mutateExt = useCallback(
+    async (fn: (d: ExtData) => void) => {
+      if (!ext) return;
+      const next = structuredClone(ext);
+      fn(next);
+      setExt(next);
+      try {
+        await saveExt(next);
+      } catch {
+        showToast("Could not save — check your connection");
+      }
+    },
+    [ext, showToast]
+  );
+
   const togglePaid = async (bill: Bill) => {
     const item = monthData?.items.find((it) => it.bill.id === bill.id);
     if (item?.payment) {
@@ -73,32 +121,73 @@ export default function App() {
     setBillFormOpen(true);
   };
 
+  const switchTab = (t: Tab) => {
+    setSub(null);
+    setTab(t);
+  };
+
+  const title =
+    tab === "home"
+      ? "Dashboard"
+      : tab === "bills"
+        ? "Monthly Bills"
+        : tab === "insights"
+          ? "Insights"
+          : "Settings";
+
   return (
     <div className="app">
-      <header className="app-header">
-        <div>
-          <div className="household">{household?.householdName ?? "\u2014"}</div>
-          <h1>
-            {tab === "home" && "Monthly Bills"}
-            {tab === "bills" && "Recurring Bills"}
-            {tab === "insights" && "Insights"}
-            {tab === "settings" && "Settings"}
-          </h1>
-        </div>
-        <div className="avatars">
-          {household?.members.map((m) => (
-            <div key={m.id} className="avatar" style={{ background: m.color }} title={m.name}>
-              {initials(m.name)}
-            </div>
-          ))}
-        </div>
-      </header>
+      {sub ? (
+        <header className="subheader">
+          <button className="back" onClick={() => setSub(null)} aria-label="Back">
+            <ArrowLeftIcon width={18} height={18} />
+          </button>
+          <h1>{SUB_TITLES[sub]}</h1>
+        </header>
+      ) : (
+        <header className="app-header">
+          <div>
+            <div className="household">{household?.householdName ?? "\u2014"}</div>
+            <h1>{title}</h1>
+          </div>
+          <div className="avatars">
+            {household?.members.map((m) => (
+              <div key={m.id} className="avatar" style={{ background: m.color }} title={m.name}>
+                {initials(m.name)}
+              </div>
+            ))}
+          </div>
+        </header>
+      )}
 
-      {loading && !monthData ? (
+      {loading || !monthData || !household || !ext ? (
         <div className="loading">Loading</div>
+      ) : sub ? (
+        <>
+          {sub === "accounts" && (
+            <AccountsView ext={ext} members={household.members} mutate={mutateExt} />
+          )}
+          {sub === "transactions" && (
+            <TransactionsView ext={ext} members={household.members} mutate={mutateExt} />
+          )}
+          {sub === "cashflow" && <CashFlowView ext={ext} month={month} />}
+          {sub === "budget" && <BudgetView ext={ext} month={month} mutate={mutateExt} />}
+          {sub === "goals" && <GoalsView ext={ext} mutate={mutateExt} />}
+          {sub === "recurring" && (
+            <BillsView
+              bills={monthData.items.map((it) => it.bill).filter((b) => b.active === 1)}
+              members={household.members}
+              onEdit={openEditBill}
+              onAdd={openAddBill}
+            />
+          )}
+        </>
       ) : (
         <>
-          {tab === "home" && monthData && household && (
+          {tab === "home" && (
+            <Dashboard ext={ext} monthData={monthData} month={currentMonth()} onOpen={setSub} />
+          )}
+          {tab === "bills" && (
             <MonthView
               data={monthData}
               month={month}
@@ -108,16 +197,8 @@ export default function App() {
               onAddBill={openAddBill}
             />
           )}
-          {tab === "bills" && monthData && household && (
-            <BillsView
-              bills={monthData.items.map((it) => it.bill).filter((b) => b.active === 1)}
-              members={household.members}
-              onEdit={openEditBill}
-              onAdd={openAddBill}
-            />
-          )}
-          {tab === "insights" && monthData && <InsightsView monthData={monthData} />}
-          {tab === "settings" && household && (
+          {tab === "insights" && <InsightsView monthData={monthData} />}
+          {tab === "settings" && (
             <SettingsView
               household={household}
               onSaved={() => {
@@ -129,7 +210,7 @@ export default function App() {
         </>
       )}
 
-      {(tab === "home" || tab === "bills") && (
+      {!sub && tab === "bills" && (
         <button className="fab" aria-label="Add bill" onClick={openAddBill}>
           <PlusIcon />
         </button>
@@ -137,8 +218,12 @@ export default function App() {
 
       <nav className="tabbar">
         {TABS.map(({ id, label, Icon }) => (
-          <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>
-            <Icon width={21} height={21} strokeWidth={tab === id ? 1.8 : 1.5} />
+          <button
+            key={id}
+            className={tab === id && !sub ? "active" : ""}
+            onClick={() => switchTab(id)}
+          >
+            <Icon width={21} height={21} strokeWidth={tab === id && !sub ? 1.8 : 1.5} />
             {label}
           </button>
         ))}
