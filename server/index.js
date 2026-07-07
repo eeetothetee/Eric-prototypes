@@ -223,6 +223,24 @@ app.delete("/api/bills/:id/pay/:month", (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- Extended app data (accounts, transactions, budgets, goals) ----------
+// Stored as a single JSON document; the client owns its shape.
+
+app.get("/api/appdata", (req, res) => {
+  const row = db.prepare("SELECT value FROM settings WHERE key = 'appdata'").get();
+  res.json(row ? JSON.parse(row.value) : {});
+});
+
+app.put("/api/appdata", (req, res) => {
+  if (!req.body || typeof req.body !== "object") {
+    return res.status(400).json({ error: "body must be a JSON object" });
+  }
+  db.prepare(
+    "INSERT INTO settings (key, value) VALUES ('appdata', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+  ).run(JSON.stringify(req.body));
+  res.json({ ok: true });
+});
+
 // ---------- History (last 6 months trend) ----------
 
 app.get("/api/history", (req, res) => {
