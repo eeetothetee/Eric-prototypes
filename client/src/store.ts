@@ -1,20 +1,10 @@
 import { IS_STATIC } from "./api";
 
 // ------------------------------------------------------------------
-// Extended household data: accounts, transactions, budgets, goals.
+// Extended household data: transactions, budgets, goals.
 // In static mode this lives in localStorage; in server mode it is
 // persisted as a JSON document via /api/appdata.
 // ------------------------------------------------------------------
-
-export type AccountType = "checking" | "savings" | "credit" | "loan" | "cash";
-
-export interface Account {
-  id: number;
-  name: string;
-  type: AccountType;
-  balance_cents: number; // for credit/loan this is the amount owed
-  owner_member_id: number | null; // null = joint
-}
 
 export type TxnKind = "expense" | "income";
 
@@ -25,7 +15,6 @@ export interface Txn {
   category: string;
   kind: TxnKind;
   amount_cents: number; // always positive; kind gives the sign
-  account_id: number | null;
   member_id: number | null; // who spent/received
   notes: string;
 }
@@ -39,20 +28,11 @@ export interface Goal {
 }
 
 export interface ExtData {
-  accounts: Account[];
   txns: Txn[];
   budgets: Record<string, number>; // category -> monthly limit in cents
   goals: Goal[];
   seq: number;
 }
-
-export const ACCOUNT_TYPES: { value: AccountType; label: string; liability: boolean }[] = [
-  { value: "checking", label: "Checking", liability: false },
-  { value: "savings", label: "Savings", liability: false },
-  { value: "cash", label: "Cash", liability: false },
-  { value: "credit", label: "Credit card", liability: true },
-  { value: "loan", label: "Loan", liability: true },
-];
 
 export const TXN_CATEGORIES = [
   "Groceries",
@@ -70,13 +50,12 @@ export const TXN_CATEGORIES = [
 
 export const BUDGET_CATEGORIES = TXN_CATEGORIES.filter((c) => c !== "Income");
 
-const EMPTY: ExtData = { accounts: [], txns: [], budgets: {}, goals: [], seq: 100 };
+const EMPTY: ExtData = { txns: [], budgets: {}, goals: [], seq: 100 };
 const LS_KEY = "family-bills:ext:v1";
 
 function normalize(raw: unknown): ExtData {
   const d = (raw && typeof raw === "object" ? raw : {}) as Partial<ExtData>;
   return {
-    accounts: Array.isArray(d.accounts) ? d.accounts : [],
     txns: Array.isArray(d.txns) ? d.txns : [],
     budgets: d.budgets && typeof d.budgets === "object" ? d.budgets : {},
     goals: Array.isArray(d.goals) ? d.goals : [],
@@ -117,17 +96,6 @@ export function nextExtId(data: ExtData): number {
 }
 
 // ---------- Derived figures ----------
-
-export function isLiability(type: AccountType): boolean {
-  return type === "credit" || type === "loan";
-}
-
-export function netWorthCents(accounts: Account[]): number {
-  return accounts.reduce(
-    (s, a) => s + (isLiability(a.type) ? -a.balance_cents : a.balance_cents),
-    0
-  );
-}
 
 export function txnMonth(t: Txn): string {
   return t.date.slice(0, 7);

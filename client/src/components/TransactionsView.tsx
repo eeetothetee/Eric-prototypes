@@ -23,14 +23,12 @@ function dateLabel(date: string): string {
 function TxnForm({
   txn,
   members,
-  accounts,
   onClose,
   onSave,
   onDelete,
 }: {
   txn: Txn | null;
   members: Member[];
-  accounts: ExtData["accounts"];
   onClose: () => void;
   onSave: (data: Omit<Txn, "id">) => void;
   onDelete: () => void;
@@ -40,7 +38,6 @@ function TxnForm({
   const [amount, setAmount] = useState(txn ? (txn.amount_cents / 100).toFixed(2) : "");
   const [category, setCategory] = useState(txn?.category ?? "Groceries");
   const [date, setDate] = useState(txn?.date ?? todayISO());
-  const [accountId, setAccountId] = useState<number | null>(txn?.account_id ?? null);
   const [memberId, setMemberId] = useState<number | null>(txn?.member_id ?? null);
   const [notes, setNotes] = useState(txn?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +54,6 @@ function TxnForm({
       amount_cents: cents,
       category: kind === "income" ? "Income" : category,
       date,
-      account_id: accountId,
       member_id: memberId,
       notes,
     });
@@ -115,23 +111,6 @@ function TxnForm({
               {TXN_CATEGORIES.filter((c) => c !== "Income").map((c) => (
                 <option key={c} value={c}>
                   {c}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {accounts.length > 0 && (
-          <div className="field">
-            <label>Account (optional)</label>
-            <select
-              value={accountId ?? ""}
-              onChange={(e) => setAccountId(e.target.value ? Number(e.target.value) : null)}
-            >
-              <option value="">None</option>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
                 </option>
               ))}
             </select>
@@ -293,7 +272,6 @@ export default function TransactionsView({ ext, members, mutate }: Props) {
         <TxnForm
           txn={editing}
           members={members}
-          accounts={ext.accounts}
           onClose={() => setFormOpen(false)}
           onSave={save}
           onDelete={remove}

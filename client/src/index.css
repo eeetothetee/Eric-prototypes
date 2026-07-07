@@ -1075,6 +1075,60 @@ textarea {
   background: var(--danger);
 }
 
+/* Hero: due-next block */
+.hero-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 2px 8px;
+}
+
+.hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.hero-foot {
+  padding: 10px 2px 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.hero-done {
+  padding: 26px 20px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.hero-done p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.hero-done p strong {
+  color: var(--ink);
+}
+
+.hero-done .btn {
+  margin-top: 12px;
+}
+
+.hero-done .hero-check {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+  margin-bottom: 8px;
+}
+
 /* ---------- Subscreen header ---------- */
 
 .subheader {
