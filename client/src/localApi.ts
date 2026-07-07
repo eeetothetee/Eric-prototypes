@@ -24,8 +24,8 @@ function seed(): Store {
   return {
     householdName: "Our Household",
     members: [
-      { id: 1, name: "Partner 1", emoji: "🧑", color: "#6366f1" },
-      { id: 2, name: "Partner 2", emoji: "🧑", color: "#ec4899" },
+      { id: 1, name: "Partner 1", emoji: "🧑", color: "#1c1c1a" },
+      { id: 2, name: "Partner 2", emoji: "🧑", color: "#0f766e" },
     ],
     bills: [],
     payments: [],

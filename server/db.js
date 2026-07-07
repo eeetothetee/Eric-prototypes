@@ -56,8 +56,8 @@ if (memberCount === 0) {
   const insertMember = db.prepare(
     "INSERT INTO members (name, emoji, color) VALUES (?, ?, ?)"
   );
-  insertMember.run("Partner 1", "🧑", "#6366f1");
-  insertMember.run("Partner 2", "🧑", "#ec4899");
+  insertMember.run("Partner 1", "🧑", "#1c1c1a");
+  insertMember.run("Partner 2", "🧑", "#0f766e");
   db.prepare(
     "INSERT OR IGNORE INTO settings (key, value) VALUES ('household_name', 'Our Household')"
   ).run();

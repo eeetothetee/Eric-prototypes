@@ -10,7 +10,6 @@ import InsightsView from "./components/InsightsView";
 import SettingsView from "./components/SettingsView";
 import BillForm from "./components/BillForm";
 import PaySheet from "./components/PaySheet";
-import AccountsView from "./components/AccountsView";
 import TransactionsView from "./components/TransactionsView";
 import CashFlowView from "./components/CashFlowView";
 import BudgetView from "./components/BudgetView";
@@ -35,7 +34,6 @@ const TABS: { id: Tab; label: string; Icon: typeof HomeIcon }[] = [
 ];
 
 const SUB_TITLES: Record<Sub, string> = {
-  accounts: "Accounts",
   transactions: "Transactions",
   cashflow: "Cash Flow",
   budget: "Budget",
@@ -124,6 +122,8 @@ export default function App() {
   const switchTab = (t: Tab) => {
     setSub(null);
     setTab(t);
+    // The dashboard always reflects the real current month.
+    if (t === "home") setMonth(currentMonth());
   };
 
   const title =
@@ -164,9 +164,6 @@ export default function App() {
         <div className="loading">Loading</div>
       ) : sub ? (
         <>
-          {sub === "accounts" && (
-            <AccountsView ext={ext} members={household.members} mutate={mutateExt} />
-          )}
           {sub === "transactions" && (
             <TransactionsView ext={ext} members={household.members} mutate={mutateExt} />
           )}
@@ -185,7 +182,14 @@ export default function App() {
       ) : (
         <>
           {tab === "home" && (
-            <Dashboard ext={ext} monthData={monthData} month={currentMonth()} onOpen={setSub} />
+            <Dashboard
+              ext={ext}
+              monthData={monthData}
+              month={currentMonth()}
+              onOpen={setSub}
+              onPayBill={(bill) => setPayingBill(bill)}
+              onViewBills={() => switchTab("bills")}
+            />
           )}
           {tab === "bills" && (
             <MonthView
